@@ -1,22 +1,25 @@
-import java.util.ArrayList;
+import domain.ReportData;
+
+import java.time.LocalDate;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
         // Поехали!
-        FileReader reader = new FileReader();
-        ArrayList<String> strings = reader.readFileContents("m.202101.csv");
-        strings.forEach(System.out::println);
-
         Scanner scanner = new Scanner(System.in);
+
+
+        ReportData reportData = new ReportData();
 
         while (true) {
             printMenu();
 
             String userInput = scanner.next().toLowerCase();
             switch (userInput) {
-                case "1": System.out.println("hi");
+                case "1": ReportUtils.getMonthsData(reportData);
+                   reportData.getMonthlyReportHashMap().get(LocalDate.of(2021,3,1)).getTransactions().forEach(System.out::println);
+                case "2": ReportUtils.getYearsData(reportData);
                 case "exit": return;
                 default:
                     System.out.println("Такой команды нет");
