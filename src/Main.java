@@ -17,13 +17,6 @@ public class Main {
             switch (userInput) {
                 case "1":
                     ReportUtils.getMonthsData(reportData);
-//                    reportData.getMonthlyReportHashMap().get(LocalDate.of(2021, 3, 1)).getTransactions().forEach(System.out::println);
-//                    MonthlyReport feb = reportData.getMonthlyReportHashMap().get(LocalDate.of(2021, 2, 1));
-//                    System.out.println("feb.getMonthDate() = " + feb.getMonthDate());
-//                    System.out.println("feb.countMonthIncome() = " + feb.countMonthIncome());
-//                    System.out.println("feb.countMonthExpenses() = " + feb.countMonthExpenses());
-//                    System.out.println("feb.getTheMostExpensiveTransaction() = " + feb.getTheMostExpensiveTransaction());
-//                    System.out.println("feb.getTheMostProfitableTransaction() = " + feb.getTheMostProfitableTransaction());
                     break;
                 case "2":
                     ReportUtils.getYearsData(reportData);
@@ -37,7 +30,6 @@ public class Main {
                 case "5":
                     ReportUtils.printYearsData(reportData);
                     break;
-
                 case "6":
                     ReportUtils.getMonthsData(reportData);
                     ReportUtils.getYearsData(reportData);

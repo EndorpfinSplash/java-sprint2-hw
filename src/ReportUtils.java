@@ -12,8 +12,8 @@ public class ReportUtils {
     private static final String FILE_EXTENSION = ".csv";
     private static final String MONTHLY_REPORT_TYPE_PREFIX = "m.";
     private static final String YEARLY_REPORT_TYPE_PREFIX = "y.";
-    public static final String READ_YEAR_DATA = "Пожалуйста выполните считывание итоговоых данных по годоам.";
-    public static final String READ_MONTH_DATA = "Пожалуйста выполните считывание итоговоых данных по месяцам.";
+    public static final String READ_YEAR_DATA = "Пожалуйста выполните считывание итоговых данных по годоам.";
+    public static final String READ_MONTH_DATA = "Пожалуйста выполните считывание итоговых данных по месяцам.";
     static String year = "2021";
     static FileReader reader = new FileReader();
 
@@ -70,7 +70,8 @@ public class ReportUtils {
                     totalMonthData -> {
                         MonthlyReport relatedMonthlyReport = reportData.getMonthlyReportHashMap().get(totalMonthData.getMonthDate());
                         return Double.compare(totalMonthData.getAmount(),
-                                totalMonthData.isExpense() ? relatedMonthlyReport.countMonthExpenses() :
+                                totalMonthData.isExpense() ?
+                                        relatedMonthlyReport.countMonthExpenses() :
                                         relatedMonthlyReport.countMonthIncome()
                         ) != 0;
 
