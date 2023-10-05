@@ -3,15 +3,20 @@ import domain.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Optional;
 
 public class ReportUtils {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final String FILE_EXTENSION = ".csv";
     private static final String MONTHLY_REPORT_TYPE_PREFIX = "m.";
     private static final String YEARLY_REPORT_TYPE_PREFIX = "y.";
+    public static final String READ_YEAR_DATA = "Пожалуйста выполните считывание итоговоых данных по годоам.";
+    public static final String READ_MONTH_DATA = "Пожалуйста выполните считывание итоговоых данных по месяцам.";
     static String year = "2021";
     static FileReader reader = new FileReader();
+
     public static void getMonthsData(ReportData reportData) {
         for (int i = 1; i <= 3; i++) {
             String monthNumber = String.format("%02d", i);
@@ -34,7 +39,7 @@ public class ReportUtils {
 
     public static void getYearsData(ReportData reportData) {
         for (int i = 1; i <= 1; i++) {
-            ArrayList<String> strings = reader.readFileContents(YEARLY_REPORT_TYPE_PREFIX + year+ FILE_EXTENSION);
+            ArrayList<String> strings = reader.readFileContents(YEARLY_REPORT_TYPE_PREFIX + year + FILE_EXTENSION);
             LocalDate yearDate = LocalDate.parse(year + "0101", DATE_TIME_FORMATTER);
             LinkedList<MonthData> monthDataList = new LinkedList<>();
             strings.stream().skip(1).forEach(s -> {
@@ -51,4 +56,80 @@ public class ReportUtils {
         }
     }
 
+    public static void checkConsistency(ReportData reportData) {
+        if (reportData.getMonthlyReportHashMap().isEmpty()) {
+            System.out.println(READ_MONTH_DATA);
+        }
+
+        if (reportData.getYearlyReportHashMap().isEmpty()) {
+            System.out.println(READ_YEAR_DATA);
+        }
+        Collection<YearlyReport> yearlyReports = reportData.getYearlyReportHashMap().values();
+        yearlyReports.forEach(yearlyReport -> {
+            Optional<MonthData> optionalMonthData = yearlyReport.getMonthData().stream().filter(
+                    totalMonthData -> {
+                        MonthlyReport relatedMonthlyReport = reportData.getMonthlyReportHashMap().get(totalMonthData.getMonthDate());
+                        return Double.compare(totalMonthData.getAmount(),
+                                totalMonthData.isExpense() ? relatedMonthlyReport.countMonthExpenses() :
+                                        relatedMonthlyReport.countMonthIncome()
+                        ) != 0;
+
+                    }
+            ).findAny();
+
+            if (optionalMonthData.isEmpty()) {
+                System.out.println("Сверка выполнена успешно.");
+            } else {
+                MonthData failedMonth = optionalMonthData.get();
+                System.out.println(
+                        (failedMonth.isExpense() ?
+                                "Расходы " :
+                                "Доходы ") +
+                                "за " +
+                                failedMonth.getMonthDate().getMonth() +
+                                " " +
+                                failedMonth.getMonthDate().getYear() +
+                                " не совпадают!"
+                );
+            }
+
+        });
+
+    }
+
+    public static void printMonthData(ReportData reportData) {
+        if (reportData.getMonthlyReportHashMap().isEmpty()) {
+            System.out.println(READ_MONTH_DATA);
+        }
+        reportData.getMonthlyReportHashMap().values().forEach(monthlyReport -> {
+            Transaction theMostExpensiveTransaction = monthlyReport.getTheMostExpensiveTransaction();
+            System.out.println(monthlyReport.getMonthDate() +
+                    ": самый прибыльный товар - " +
+                    theMostExpensiveTransaction.getItem_name() +
+                    ", общаая сумма за данные товары - " +
+                    String.format("%,.1f", theMostExpensiveTransaction.getQuantity() * theMostExpensiveTransaction.getUnit_price())
+            );
+        });
+
+    }
+
+    public static void printYearsData(ReportData reportData) {
+        if (reportData.getYearlyReportHashMap().isEmpty()) {
+            System.out.println(READ_YEAR_DATA);
+        }
+        reportData.getYearlyReportHashMap().values().forEach(
+                yearlyReport -> {
+                    LinkedList<MonthData> currentMonthData = yearlyReport.getMonthData();
+                    currentMonthData
+                            .stream()
+                            .filter(monthData -> !monthData.isExpense())
+                            .forEach(monthData -> System.out.println(yearlyReport.getYearDate().getYear() +
+                                    ": прибыль за месяц " +
+                                    monthData.getMonthDate().getMonth() +
+                                    " составила " + String.format("%,.1f", monthData.getAmount())));
+                    System.out.println("Средний расход за все имеющиеся операции в году: " + String.format("%,.1f", yearlyReport.getAverageExpenses()));
+                    System.out.println("Средний доход за все имеющиеся операции в году: " + String.format("%,.1f", yearlyReport.getAverageIncomes()));
+                }
+        );
+    }
 }

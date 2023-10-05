@@ -19,4 +19,21 @@ public class YearlyReport {
     public LocalDate getYearDate() {
         return yearDate;
     }
+
+    public Double getAverageExpenses() {
+        return monthData.stream()
+                .filter(MonthData::isExpense)
+                .mapToDouble(MonthData::getAmount)
+                .average()
+                .orElse(Double.NaN);
+    }
+
+    public Double getAverageIncomes() {
+        return monthData.stream()
+                .filter(monthData1 -> !monthData1.isExpense())
+                .mapToDouble(MonthData::getAmount)
+                .average()
+                .orElse(Double.NaN);
+    }
+
 }
