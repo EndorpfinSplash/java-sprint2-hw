@@ -14,8 +14,8 @@ public class ReportData {
     private static final String FILE_EXTENSION = ".csv";
     private static final String MONTHLY_REPORT_TYPE_PREFIX = "m.";
     private static final String YEARLY_REPORT_TYPE_PREFIX = "y.";
-    public static final String READ_YEAR_DATA = "Пожалуйста выполните считывание итоговых данных по годам.";
-    public static final String READ_MONTH_DATA = "Пожалуйста выполните считывание итоговых данных по месяцам.";
+    private static final String READ_YEAR_DATA = "Пожалуйста выполните считывание итоговых данных по годам.";
+    private static final String READ_MONTH_DATA = "Пожалуйста выполните считывание итоговых данных по месяцам.";
     static String year = "2021";
     static FileReader reader = new FileReader();
 

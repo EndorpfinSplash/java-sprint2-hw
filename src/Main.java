@@ -34,6 +34,7 @@ public class Main {
                     reportData.checkConsistency();
                     break;
                 case "exit":
+                    scanner.close();
                     return;
                 default:
                     System.out.println("Такой команды нет");

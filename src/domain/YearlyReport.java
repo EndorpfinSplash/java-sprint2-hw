@@ -3,12 +3,13 @@ package domain;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 public class YearlyReport {
     private final LocalDate yearDate;
     private final LinkedList<MonthDataRecord> monthDataRecords;
 
-    private final HashMap<LocalDate, Double> profitMap = new HashMap<>();
+    private final Map<LocalDate, Double> profitMap = new HashMap<>();
 
     public YearlyReport(LocalDate yearDate, LinkedList<MonthDataRecord> monthDataRecords) {
         this.yearDate = yearDate;
@@ -30,7 +31,7 @@ public class YearlyReport {
                 .average()
                 .orElse(Double.NaN);
     }
-    public HashMap<LocalDate, Double> getProfitMap() {
+    public Map<LocalDate, Double> getProfitMap() {
         if (this.profitMap.isEmpty()) {
             calculateProfitMap();
         }
@@ -45,7 +46,7 @@ public class YearlyReport {
                 .orElse(Double.NaN);
     }
 
-    public void calculateProfitMap() {
+    private void calculateProfitMap() {
         monthDataRecords.forEach(monthDataRecord -> {
             Double profit = monthDataRecord.isExpense() ? -monthDataRecord.getAmount() : monthDataRecord.getAmount();
             if (this.profitMap.containsKey(monthDataRecord.getMonthDate())) {
