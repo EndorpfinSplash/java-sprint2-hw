@@ -1,23 +1,30 @@
-import domain.*;
+import domain.MonthDataRecord;
+import domain.MonthlyReport;
+import domain.Transaction;
+import domain.YearlyReport;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Optional;
+import java.util.*;
 
-public class ReportUtils {
+public class ReportData {
+    private final HashMap<LocalDate, MonthlyReport> monthlyReportHashMap;
+    private final HashMap<LocalDate, YearlyReport> yearlyReportHashMap;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
     private static final String FILE_EXTENSION = ".csv";
     private static final String MONTHLY_REPORT_TYPE_PREFIX = "m.";
     private static final String YEARLY_REPORT_TYPE_PREFIX = "y.";
-    public static final String READ_YEAR_DATA = "Пожалуйста выполните считывание итоговых данных по годоам.";
+    public static final String READ_YEAR_DATA = "Пожалуйста выполните считывание итоговых данных по годам.";
     public static final String READ_MONTH_DATA = "Пожалуйста выполните считывание итоговых данных по месяцам.";
     static String year = "2021";
     static FileReader reader = new FileReader();
 
-    public static void getMonthsData(ReportData reportData) {
+    public ReportData() {
+        this.monthlyReportHashMap = new HashMap<>();
+        this.yearlyReportHashMap = new HashMap<>();
+    }
+
+    public void readMonthsData() {
         for (int i = 1; i <= 3; i++) {
             String monthNumber = String.format("%02d", i);
             ArrayList<String> strings = reader.readFileContents(MONTHLY_REPORT_TYPE_PREFIX + year + monthNumber + FILE_EXTENSION);
@@ -33,55 +40,56 @@ public class ReportUtils {
                 transactions.add(transaction);
             });
             MonthlyReport parsedMonth = new MonthlyReport(monthDate, transactions);
-            reportData.getMonthlyReportHashMap().put(monthDate, parsedMonth);
+            monthlyReportHashMap.put(monthDate, parsedMonth);
         }
     }
 
-    public static void getYearsData(ReportData reportData) {
+    public void readYearsData() {
         for (int i = 1; i <= 1; i++) {
             ArrayList<String> strings = reader.readFileContents(YEARLY_REPORT_TYPE_PREFIX + year + FILE_EXTENSION);
             LocalDate yearDate = LocalDate.parse(year + "0101", DATE_TIME_FORMATTER);
-            LinkedList<MonthData> monthDataList = new LinkedList<>();
+            LinkedList<MonthDataRecord> monthDataRecordList = new LinkedList<>();
             strings.stream().skip(1).forEach(s -> {
                 String[] lineContents = s.split(",");
                 String monthNumber = lineContents[0];
                 LocalDate monthDate = LocalDate.parse(year + monthNumber + "01", DATE_TIME_FORMATTER);
                 Double amount = Double.parseDouble(lineContents[1]);
                 Boolean is_expense = Boolean.parseBoolean(lineContents[2]);
-                MonthData monthData = new MonthData(monthDate, amount, is_expense);
-                monthDataList.add(monthData);
+                MonthDataRecord monthDataRecord = new MonthDataRecord(monthDate, amount, is_expense);
+                monthDataRecordList.add(monthDataRecord);
             });
-            YearlyReport parsedYear = new YearlyReport(yearDate, monthDataList);
-            reportData.getYearlyReportHashMap().put(yearDate, parsedYear);
+            YearlyReport parsedYear = new YearlyReport(yearDate, monthDataRecordList);
+            yearlyReportHashMap.put(yearDate, parsedYear);
         }
     }
 
-    public static void checkConsistency(ReportData reportData) {
-        if (reportData.getMonthlyReportHashMap().isEmpty()) {
+    public void checkConsistency() {
+        if (this.monthlyReportHashMap.isEmpty()) {
             System.out.println(READ_MONTH_DATA);
+            return;
         }
 
-        if (reportData.getYearlyReportHashMap().isEmpty()) {
+        if (this.yearlyReportHashMap.isEmpty()) {
             System.out.println(READ_YEAR_DATA);
+            return;
         }
-        Collection<YearlyReport> yearlyReports = reportData.getYearlyReportHashMap().values();
+        Collection<YearlyReport> yearlyReports = yearlyReportHashMap.values();
         yearlyReports.forEach(yearlyReport -> {
-            Optional<MonthData> optionalMonthData = yearlyReport.getMonthData().stream().filter(
-                    totalMonthData -> {
-                        MonthlyReport relatedMonthlyReport = reportData.getMonthlyReportHashMap().get(totalMonthData.getMonthDate());
-                        return Double.compare(totalMonthData.getAmount(),
-                                totalMonthData.isExpense() ?
+            Optional<MonthDataRecord> optionalMonthData = yearlyReport.getMonthDataRecords().stream().filter(
+                    totalMonthDataRecord -> {
+                        MonthlyReport relatedMonthlyReport = monthlyReportHashMap.get(totalMonthDataRecord.getMonthDate());
+                        return Double.compare(totalMonthDataRecord.getAmount(),
+                                totalMonthDataRecord.isExpense() ?
                                         relatedMonthlyReport.countMonthExpenses() :
                                         relatedMonthlyReport.countMonthIncome()
                         ) != 0;
-
                     }
             ).findAny();
 
             if (optionalMonthData.isEmpty()) {
                 System.out.println("Сверка выполнена успешно.");
             } else {
-                MonthData failedMonth = optionalMonthData.get();
+                MonthDataRecord failedMonth = optionalMonthData.get();
                 System.out.println(
                         (failedMonth.isExpense() ?
                                 "Расходы " :
@@ -93,16 +101,15 @@ public class ReportUtils {
                                 " не совпадают!"
                 );
             }
-
         });
-
     }
 
-    public static void printMonthData(ReportData reportData) {
-        if (reportData.getMonthlyReportHashMap().isEmpty()) {
+    public void printMonthData() {
+        if (this.monthlyReportHashMap.isEmpty()) {
             System.out.println(READ_MONTH_DATA);
+            return;
         }
-        reportData.getMonthlyReportHashMap().values().forEach(monthlyReport -> {
+        this.monthlyReportHashMap.values().forEach(monthlyReport -> {
             Transaction theMostExpensiveTransaction = monthlyReport.getTheMostExpensiveTransaction();
             System.out.println(monthlyReport.getMonthDate() +
                     ": самый прибыльный товар - " +
@@ -114,23 +121,22 @@ public class ReportUtils {
 
     }
 
-    public static void printYearsData(ReportData reportData) {
-        if (reportData.getYearlyReportHashMap().isEmpty()) {
+    public void printYearsData() {
+        if (this.yearlyReportHashMap.isEmpty()) {
             System.out.println(READ_YEAR_DATA);
+            return;
         }
-        reportData.getYearlyReportHashMap().values().forEach(
+        this.yearlyReportHashMap.values().forEach(
                 yearlyReport -> {
-                    LinkedList<MonthData> currentMonthData = yearlyReport.getMonthData();
-                    currentMonthData
-                            .stream()
-                            .filter(monthData -> !monthData.isExpense())
-                            .forEach(monthData -> System.out.println(yearlyReport.getYearDate().getYear() +
+                    yearlyReport.getProfitMap().forEach((localDate, profit) ->
+                            System.out.println(yearlyReport.getYearDate().getYear() +
                                     ": прибыль за месяц " +
-                                    monthData.getMonthDate().getMonth() +
-                                    " составила " + String.format("%,.1f", monthData.getAmount())));
+                                    localDate.getMonth() +
+                                    " составила " + String.format("%,.1f", profit)));
                     System.out.println("Средний расход за все имеющиеся операции в году: " + String.format("%,.1f", yearlyReport.getAverageExpenses()));
                     System.out.println("Средний доход за все имеющиеся операции в году: " + String.format("%,.1f", yearlyReport.getAverageIncomes()));
                 }
         );
     }
+
 }

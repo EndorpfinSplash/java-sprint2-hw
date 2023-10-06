@@ -14,20 +14,8 @@ public class MonthlyReport {
         this.monthDate = monthDate;
     }
 
-    public LinkedList<Transaction> getTransactions() {
-        return transactions;
-    }
-
     public Month getMonthDate() {
         return monthDate.getMonth();
-    }
-
-    public Transaction getTheMostProfitableTransaction() {
-        return transactions.stream()
-                .filter(transaction -> !transaction.is_expense)
-                .max(Comparator.comparingInt(o -> (int) (o.quantity * o.unit_price)))
-                .get();
-
     }
 
     public Transaction getTheMostExpensiveTransaction() {

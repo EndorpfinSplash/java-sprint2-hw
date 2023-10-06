@@ -1,5 +1,3 @@
-import domain.ReportData;
-
 import java.util.Scanner;
 
 public class Main {
@@ -16,24 +14,24 @@ public class Main {
             String userInput = scanner.next().toLowerCase();
             switch (userInput) {
                 case "1":
-                    ReportUtils.getMonthsData(reportData);
+                    reportData.readMonthsData();
                     break;
                 case "2":
-                    ReportUtils.getYearsData(reportData);
+                    reportData.readYearsData();
                     break;
                 case "3":
-                    ReportUtils.checkConsistency(reportData);
+                    reportData.checkConsistency();
                     break;
                 case "4":
-                    ReportUtils.printMonthData(reportData);
+                    reportData.printMonthData();
                     break;
                 case "5":
-                    ReportUtils.printYearsData(reportData);
+                    reportData.printYearsData();
                     break;
                 case "6":
-                    ReportUtils.getMonthsData(reportData);
-                    ReportUtils.getYearsData(reportData);
-                    ReportUtils.checkConsistency(reportData);
+                    reportData.readMonthsData();
+                    reportData.readYearsData();
+                    reportData.checkConsistency();
                     break;
                 case "exit":
                     return;
